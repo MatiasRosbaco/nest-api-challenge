@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User{
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  email String @unique
+  hash String
+
+  firstName String?
+  lastName String?
+
+  accounts Account[]
+
+  @@map("users")
+}
+
+model Account{
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  destinyTransactions Transaction[] @relation("accountDestiny")
+  originTransactions Transaction[] @relation("accountOrigin")
+
+  userId Int
+  user User @relation(fields: [userId],references: [id], onDelete: Cascade)
+
+  currencyId Int
+  currency Currency @relation(fields: [currencyId],references: [id], onDelete: Cascade)
+}
+
+model Currency{
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  accounts Account[]
+
+  name String
+  amount Int
+}
+
+model Transaction{
+  id Int @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  title String
+  description String
+  link String
+
+  accountOriginId Int
+  accountOrigin Account @relation("accountOrigin",fields: [accountOriginId],references: [id], onDelete: Cascade)
+  
+  accountDestinyId Int
+  accountDestiny Account @relation("accountDestiny",fields: [accountDestinyId],references: [id], onDelete: Cascade)
+
+  @@map("transactions")
+}
